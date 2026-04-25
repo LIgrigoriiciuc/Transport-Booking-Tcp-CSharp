@@ -1,2 +1,2 @@
 # Transport-Booking-Udp-CSharp
-Desktop client-server reservation system for a transport company, built in C#. Uses UDP with application-level reliability (custom ACK and retransmit mechanism). Real-time notifications to all connected clients on reservation changes.
+A desktop client-server application built in C# using TCP/IP for reliable, connection-oriented communication. The system ensures guaranteed data delivery for all booking transactions and features a push-based architecture to provide real-time notifications to all connected clients upon reservation changes.
