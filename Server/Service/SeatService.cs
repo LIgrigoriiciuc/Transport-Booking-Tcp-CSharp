@@ -23,4 +23,21 @@ public class SeatService : AbstractService<long, Seat>
         filter.AddFilter("reservation_id", reservationId);
         return Filter(filter);
     }
+    public List<Seat> GetFreeByTripId(long tripId)
+    {
+        var filter = new Filter();
+        filter.AddFilter("trip_id", tripId);
+        filter.AddFilter("isReserved", 0);
+        return Filter(filter);
+    }
+    public List<int> GetSeatNumbersByReservation(long reservationId)
+        => GetByReservationId(reservationId)
+            .Select(s => s.Number)
+            .ToList();
+    
+    public long? GetTripIdByReservationId(long reservationId)
+        => GetByReservationId(reservationId)
+            .Select(s => (long?)s.TripId)
+            .FirstOrDefault();
 }
+    

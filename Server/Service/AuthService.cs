@@ -1,84 +1,61 @@
 ﻿using Server.Domain;
 using Server.Repository;
-
+using BC = BCrypt.Net.BCrypt;
 namespace Server.Service;
 
 
-public class UserService : AbstractService<long, User>
+public class AuthService : AbstractService<long, User>
 {
     private const int BcryptRounds = 12;
-    private readonly OfficeService _officeService;
     public User? LoggedInUser { get; private set; } = null;
 
-    public UserService(UserRepository repository, OfficeService officeService) : base(repository)
+    public AuthService(UserRepository repository) : base(repository)
     {
-        _officeService = officeService;
+       
     }
 
     public static string HashPassword(string plainPassword)
-    {
-        return BC.HashPassword(plainPassword, BcryptRounds);
-    }
-
+        => BC.HashPassword(plainPassword, BcryptRounds);
+ 
     public static bool CheckPassword(string plainPassword, string hashed)
     {
-        try
-        {
-            return BC.Verify(plainPassword, hashed);
-        }
-        catch
-        {
-            return false;
-        }
+        try { return BC.Verify(plainPassword, hashed); }
+        catch { return false; }
     }
-
+ 
     public User Login(string username, string password)
     {
         if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
-        {
             throw new ArgumentException("Username and password are required.");
-        }
-
+ 
         var f = new Filter();
         f.AddFilter("username", username);
-        
+ 
         var matches = Repository.Filter(f);
         if (!matches.Any())
-        {
             throw new UnauthorizedAccessException("Incorrect credentials.");
-        }
-
+ 
         var user = matches[0];
         string stored = user.Password;
-        bool isValid;
-
-        if (stored.StartsWith("$2"))
+        bool valid;
+ 
+        if (stored.StartsWith("$2a$") || stored.StartsWith("$2b$") || stored.StartsWith("$2y$"))
         {
-            isValid = CheckPassword(password, stored);
+            valid = CheckPassword(password, stored);
         }
         else
         {
-            isValid = stored == password;
-            if (isValid)
+            valid = stored == password;
+            if (valid)
             {
                 user.Password = HashPassword(password);
                 Repository.Update(user);
             }
         }
-
-        if (!isValid)
-        {
+ 
+        if (!valid)
             throw new UnauthorizedAccessException("Incorrect credentials.");
-        }
-        var office = _officeService.FindById(user.OfficeId);
-        user.OfficeName = office?.Address ?? "Unknown Office";
-
-        LoggedInUser = user;
+ 
         return user;
-    }
-
-    public void Logout()
-    {
-        LoggedInUser = null;
     }
 }

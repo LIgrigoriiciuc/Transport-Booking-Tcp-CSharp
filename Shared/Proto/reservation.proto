@@ -34,13 +34,13 @@ message TripList {
   repeated ProtoTrip trips = 1; }
 
 message GetSeatsPayload { 
-  int64 tripId    = 1; }
+  int64 tripId = 1; }
 
 message ProtoSeat {
-  int64 id            = 1;
-  int32 number        = 2;
-  bool  reserved      = 3;
-  int64 tripId        = 4;
+  int64 id = 1;
+  int32 number = 2;
+  bool  reserved = 3;
+  int64 tripId = 4;
   int64 reservationId = 5;
 }
 message SeatList { 
@@ -56,56 +56,55 @@ message CancelReservationPayload {
   int64 reservationId = 1; }
 
 message ProtoReservation {
-  int64  id              = 1;
-  string clientName      = 2;
+  int64  id = 1;
+  string clientName = 2;
   string reservationTime = 3;
-  int64  tripId          = 4;
+  int64 tripId = 4;
   repeated int32 seatNumbers = 5;
-  string userUsername    = 6;
+  string userUsername = 6;
 }
 message ReservationList { 
   repeated ProtoReservation reservations = 1; }
 
 message Request {
   enum Type {
-    LOGIN              = 0;
-    LOGOUT             = 1;
-    SEARCH_TRIPS       = 2;
-    GET_SEATS          = 3;
-    GET_RESERVATIONS   = 4;
-    MAKE_RESERVATION   = 5;
+    LOGIN = 0;
+    LOGOUT = 1;
+    SEARCH_TRIPS = 2;
+    GET_SEATS = 3;
+    GET_RESERVATIONS = 4;
+    MAKE_RESERVATION = 5;
     CANCEL_RESERVATION = 6;
   }
   Type type = 1;
-
   oneof payload {
-    LoginPayload             login              = 2;
-    LogoutPayload            logout             = 3;
-    SearchTripsPayload       searchTrips        = 4;
-    GetSeatsPayload          getSeats           = 5;
-    MakeReservationPayload   makeReservation    = 6;
-    CancelReservationPayload cancelReservation  = 7;
+    LoginPayload login = 2;
+    LogoutPayload logout = 3;
+    SearchTripsPayload searchTrips = 4;
+    GetSeatsPayload getSeats = 5;
+    MakeReservationPayload makeReservation = 6;
+    CancelReservationPayload cancelReservation = 7;
   }
 }
 
 
 message Response {
   enum Type {
-    OK               = 0;
-    ERROR            = 1;
-    LOGIN_OK         = 2;
-    TRIPS            = 3;
-    SEATS            = 4;
-    RESERVATIONS     = 5;
-    PUSH             = 6;
+    OK = 0;
+    ERROR = 1;
+    LOGIN_OK = 2;
+    TRIPS = 3;
+    SEATS = 4;
+    RESERVATIONS = 5;
+    PUSH = 6;
   }
-  Type type  = 1;
+  Type type = 1;
   string error = 2;
 
   oneof payload {
     ProtoUser user  = 3;
-    TripList  trips = 4;
-    SeatList  seats = 5;
+    TripList trips = 4;
+    SeatList seats = 5;
     ReservationList reservations = 6;
     PushPayload push = 7;
   }

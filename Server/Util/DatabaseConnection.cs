@@ -1,82 +1,45 @@
-﻿namespace Server.Util;
+﻿using System.Configuration;
+using Microsoft.Data.Sqlite;
+
+namespace Server.Util;
 
 public class DatabaseConnection
 {
-    private static SqliteConnection? _instance;
     private static readonly string DbUrl;
-
+ 
+    [ThreadStatic]
+    private static SqliteConnection? _transactionConnection;
+    [ThreadStatic]
+    private static SqliteTransaction? _activeTransaction;
     static DatabaseConnection()
     {
         var settings = ConfigurationManager.ConnectionStrings["DefaultConnection"];
-        DbUrl = settings?.ConnectionString ?? "Data Source=transport.db";
-        }
-
-    public static SqliteConnection Instance
-    {
-        get
-        {
-            if (_instance == null)
-            {
-                try
-                {
-                    _instance = new SqliteConnection(DbUrl);
-                    _instance.Open();
-                    InitSchema(_instance);
-                }
-                catch (Exception ex)
-                {
-                    throw;
-                }
-            }
-            return _instance;
-        }
+        var baseUrl = settings?.ConnectionString ?? "Data Source=transport.db";
+        DbUrl = baseUrl.TrimEnd(';') + ";Pooling=True;Max Pool Size=10;";
+        using var conn = new SqliteConnection(DbUrl);
+        conn.Open();
     }
 
-    private static void InitSchema(SqliteConnection conn)
+    public static void BindConnection(SqliteConnection conn, SqliteTransaction tx)
     {
-        using var command = conn.CreateCommand();
-        command.CommandText = @"
-            CREATE TABLE IF NOT EXISTS offices (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                address TEXT NOT NULL
-            );
-            CREATE TABLE IF NOT EXISTS users (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                username TEXT NOT NULL UNIQUE,
-                password TEXT NOT NULL,
-                fullName TEXT,
-                officeId INTEGER,
-                FOREIGN KEY (officeId) REFERENCES offices(id)
-            );
-            CREATE TABLE IF NOT EXISTS trips (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                destination TEXT NOT NULL,
-                time TEXT NOT NULL,
-                busNumber TEXT NOT NULL
-            );
-            CREATE TABLE IF NOT EXISTS reservations (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                clientName TEXT NOT NULL,
-                reservationTime TEXT NOT NULL
-            );
-            CREATE TABLE IF NOT EXISTS seats (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                number INTEGER NOT NULL,
-                isReserved INTEGER NOT NULL DEFAULT 0,
-                trip_id INTEGER NOT NULL,
-                reservation_id INTEGER,
-                FOREIGN KEY (trip_id) REFERENCES trips(id),
-                FOREIGN KEY (reservation_id) REFERENCES reservations(id)
-            );";
-        command.ExecuteNonQuery();
+        _transactionConnection = conn;
+        _activeTransaction = tx;
+    }
+ 
+    public static void UnbindConnection()
+    {
+        _transactionConnection = null;
+        _activeTransaction = null;
     }
 
-    public static void Close()
+    public static ConnectionHolder GetConnection()
     {
-        if (_instance != null)
-        {
-            _instance.Close();
-            _instance = null;
-        }
+        if (_transactionConnection != null)
+            return new ConnectionHolder(_transactionConnection, false);
+ 
+        var conn = new SqliteConnection(DbUrl);
+        conn.Open();
+        return new ConnectionHolder(conn, true);
     }
+    public static SqliteTransaction? GetActiveTransaction() => _activeTransaction;
 }
