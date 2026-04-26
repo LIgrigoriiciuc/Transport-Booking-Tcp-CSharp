@@ -8,34 +8,33 @@ public static class ProtoUtils
     public static ProtoUser ToProto(User user, Office? office) => new ProtoUser
     {
         Id = user.Id,
-        FullName  = user.FullName,
+        FullName = user.FullName,
         OfficeAddress = office?.Address ?? ""
     };
     public static ProtoTrip ToProto(Trip trip, int freeSeats) => new ProtoTrip
     {
-        Id          = trip.Id,
+        Id = trip.Id,
         Destination = trip.Destination,
-        Time        = trip.Time.ToString("yyyy-MM-dd HH:mm"),
-        BusNumber   = trip.BusNumber,
-        FreeSeats   = freeSeats
+        Time = trip.Time.ToString("yyyy-MM-dd HH:mm"),
+        BusNumber = trip.BusNumber,
+        FreeSeats = freeSeats
     };
     public static ProtoSeat ToProto(Seat seat) => new ProtoSeat
     {
-        Id            = seat.Id,
-        Number        = seat.Number,
-        Reserved      = seat.IsReserved,
-        TripId        = seat.TripId,
+        Id = seat.Id,
+        Number = seat.Number,
+        Reserved = seat.IsReserved,
+        TripId = seat.TripId,
         ReservationId = seat.ReservationId ?? 0
     };
-    public static ProtoReservation ToProto(Reservation r, List<int> seatNumbers, 
-        User user, long tripId) => new ProtoReservation
+    public static ProtoReservation ToProto(Reservation r, List<int> seatNumbers, User user, long tripId) => new ProtoReservation
     {
-        Id              = r.Id,
-        ClientName      = r.ClientName,
+        Id = r.Id,
+        ClientName = r.ClientName,
         ReservationTime = r.ReservationTime.ToString("yyyy-MM-dd HH:mm"),
-        TripId          = tripId,
-        UserUsername    = user.Username,
-        SeatNumbers     = { seatNumbers }
+        TripId = tripId,
+        UserUsername = user.Username,
+        SeatNumbers = { seatNumbers }
     };
     public static TripList ToTripList(List<Trip> trips, List<int> freeSeats)
     {
@@ -53,7 +52,7 @@ public static class ProtoUtils
     }
 
     public static ReservationList ToReservationList(List<Reservation> reservations,
-        List<List<int>> seatsPerRes, List<User> users, List<long> tripIds)
+        List<List<int>> seatsPerRes, List<User?> users, List<long> tripIds)
     {
         var list = new ReservationList();
         for (int i = 0; i < reservations.Count; i++)

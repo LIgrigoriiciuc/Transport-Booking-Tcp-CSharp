@@ -15,9 +15,8 @@ public class DatabaseConnection
     {
         var settings = ConfigurationManager.ConnectionStrings["DefaultConnection"];
         var baseUrl = settings?.ConnectionString ?? "Data Source=transport.db";
-        DbUrl = baseUrl.TrimEnd(';') + ";Pooling=True;Max Pool Size=10;";
-        using var conn = new SqliteConnection(DbUrl);
-        conn.Open();
+        //pooling=true closes itself
+        DbUrl = baseUrl.TrimEnd(';') + ";Pooling=True;";
     }
 
     public static void BindConnection(SqliteConnection conn, SqliteTransaction tx)

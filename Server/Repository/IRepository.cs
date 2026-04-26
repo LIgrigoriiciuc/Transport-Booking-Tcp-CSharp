@@ -1,4 +1,6 @@
-﻿namespace Server.Repository;
+﻿using Server.Domain;
+
+namespace Server.Repository;
 
 public interface IRepository<TId, TE> where TE : Entity<TId>
 {

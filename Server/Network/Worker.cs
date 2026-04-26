@@ -1,49 +1,54 @@
 ﻿using System.Net.Sockets;
+using System.Runtime.CompilerServices;
 using Google.Protobuf;
+using Shared;
 using Shared.Network;
 using Shared.Proto;
 
 namespace Server.Network;
 
-public class Worker
+public class Worker : IObserver
 { 
     private readonly NetworkServiceImpl _service;
-    private readonly TcpClient             _client;
-    private readonly NetworkStream         _stream;
-    private volatile bool                  _running = true;
-    private long?                          _loggedUserId;
+    private readonly TcpClient _client;
+    private readonly NetworkStream  _stream;
+    private long? _loggedUserId;
     public Worker(NetworkServiceImpl service, TcpClient client)
     {
         _service = service;
-        _client  = client;
-        _stream  = client.GetStream();
+        _client = client;
+        _stream = client.GetStream();
     }
+
     public void Run()
     {
-        while (_running)
+        try
         {
-            try
+            while (true)
             {
-                var request  = Request.Parser.ParseDelimitedFrom(_stream);
+                var request = Request.Parser.ParseDelimitedFrom(_stream);
                 var response = HandleRequest(request);
                 if (response != null)
                     SendResponse(response);
             }
-            catch (Exception)
-            {
-                _running = false;
-            }
         }
-        ForceLogout();
-        Close();
+        catch (Exception)
+        {
+            //connection dropped
+        }
+        finally
+        {
+            Cleanup();
+        }
     }
-    // called from NotifyPush — different thread
+
+    //called from thread pool
     public void OnPushReceived(PushPayload push)
     {
         SendResponse(new Response
         {
             Type = Response.Types.Type.Push,
-            ResponseFactory.Push = push
+            Push = push 
         });
     }
     private Response? HandleRequest(Request req)
@@ -54,7 +59,7 @@ public class Worker
             {
                 case Request.Types.Type.Login:
                 {
-                    var p    = req.Login;
+                    var p = req.Login;
                     var user = _service.Login(p.Username, p.Password);
                     _loggedUserId = user.Id;
                     _service.RegisterObserver(user.Id, this);
@@ -71,7 +76,7 @@ public class Worker
                 }
                 case Request.Types.Type.SearchTrips:
                 {
-                    var p     = req.SearchTrips;
+                    var p= req.SearchTrips;
                     var trips = _service.SearchTrips(p.Destination, p.From, p.To);
                     return ResponseFactory.TripsResponse(trips);
                 }
@@ -114,19 +119,16 @@ public class Worker
         }
     }
 
-    private void ForceLogout()
+    private void Cleanup()
     {
         if (_loggedUserId.HasValue)
+            _service.Logout(_loggedUserId.Value); // covers both clean logout miss and TCP drop
+        try
         {
-            _service.UnregisterObserver(_loggedUserId.Value);
-            _loggedUserId = null;
+            _stream.Close(); 
+            _client.Close();
         }
-    }
-
-    private void Close()
-    {
-        try { _stream.Close(); _client.Close(); }
-        catch { /* ignored */ }
+        catch { /* ignore */ }
     }
 
 }

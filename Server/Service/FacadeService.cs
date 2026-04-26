@@ -39,9 +39,9 @@ public class FacadeService
     public List<Seat> GetSeatsForTrip(long tripId) 
         => _seatService.GetByTripId(tripId);
 
-    public void MakeReservationForSeats(string clientName, List<Seat> chosenSeats)
+    public void MakeReservationForSeats(string clientName, List<Seat> chosenSeats, long userId)
     {
-        _txManager.Run(() => _reservationService.ReserveSeats(clientName, chosenSeats));
+        _txManager.Run(() => _reservationService.ReserveSeats(clientName, chosenSeats, userId));
     }
 
     public void CancelReservation(long reservationId)
@@ -67,6 +67,6 @@ public class FacadeService
     public List<int> GetSeatNumbersByReservation(long reservationId)
         => _seatService.GetSeatNumbersByReservation(reservationId);
  
-    public long? GetTripIdByReservation(long reservationId)
-        => _seatService.GetTripIdByReservationId(reservationId);
+    public long GetTripIdByReservation(long reservationId)
+        => _seatService.GetTripIdByReservationId(reservationId) ?? 0L;
 }
