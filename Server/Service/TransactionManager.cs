@@ -11,7 +11,7 @@ public class TransactionManager
         using var holder = DatabaseConnection.GetConnection();
         var conn = holder.Connection;
         using var transaction = conn.BeginTransaction();
-        DatabaseConnection.BindConnection(conn, transaction);
+        DatabaseConnection.BindConnection(transaction);
         try
         {
             work();

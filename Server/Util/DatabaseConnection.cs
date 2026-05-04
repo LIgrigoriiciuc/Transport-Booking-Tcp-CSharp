@@ -10,8 +10,6 @@ public class DatabaseConnection
     private static readonly string DbUrl;
  
     [ThreadStatic]
-    private static SqliteConnection? _transactionConnection;
-    [ThreadStatic]
     private static SqliteTransaction? _activeTransaction;
     static DatabaseConnection()
     {
@@ -21,25 +19,23 @@ public class DatabaseConnection
         DbUrl = baseUrl.TrimEnd(';') + ";Pooling=True;";
     }
 
-    public static void BindConnection(SqliteConnection conn, SqliteTransaction tx)
+    public static void BindConnection(SqliteTransaction tx)
     {
         Logger.Debug("Binding transaction");
-        _transactionConnection = conn;
         _activeTransaction = tx;
     }
  
     public static void UnbindConnection()
     {
         Logger.Debug("Unbinding transaction");
-        _transactionConnection = null;
         _activeTransaction = null;
     }
 
     public static ConnectionHolder GetConnection()
     {
         Logger.Debug("Getting database connection");
-        if (_transactionConnection != null)
-            return new ConnectionHolder(_transactionConnection, false);
+        if (_activeTransaction != null)
+            return new ConnectionHolder(_activeTransaction.Connection!, false);
  
         var conn = new SqliteConnection(DbUrl);
         conn.Open();
