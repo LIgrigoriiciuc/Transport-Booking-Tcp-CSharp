@@ -9,7 +9,7 @@ public class AuthService : AbstractService<long, User>
     private const int BcryptRounds = 12;
     public User? LoggedInUser { get; private set; } = null;
 
-    public AuthService(UserRepository repository) : base(repository)
+    public AuthService(IRepository<long,User> repository) : base(repository)
     {
        
     }

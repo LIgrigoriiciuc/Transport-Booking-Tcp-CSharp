@@ -6,9 +6,9 @@ using Server.Util;
 
 namespace Server.Repository;
 
-public abstract class GenericRepository<TId, TE> where TE : Entity<TId>
+public abstract class GenericRepository<TId, TE> : IRepository<TId, TE> where TE : Entity<TId>
 {
-    private static readonly ILogger Logger = Log.ForContext(typeof(GenericRepository));
+    private static readonly ILogger Logger = Log.ForContext(typeof(GenericRepository<,>));
     private SqliteCommand CreateCommand(string sql, SqliteConnection conn)
     {
         var cmd = new SqliteCommand(sql, conn);

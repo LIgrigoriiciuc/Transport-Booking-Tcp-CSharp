@@ -5,6 +5,7 @@ using Server.Repository;
 using Server.Service;
 using Server.Util;
 using Serilog;
+using Server.Repository.EF;
 
 namespace Server;
 
@@ -24,9 +25,9 @@ public class StartServer
         DatabaseInitializer.Initialize();
         int port = LoadPort();
         Logger.Information("Server starting on port {Port}", port);
-        var seatRepo = new SeatRepository();
+        var seatRepo = new EFSeatRepository();
         var tripRepo = new TripRepository();
-        var resRepo = new ReservationRepository();
+        var resRepo = new EFReservationRepository();
         var userRepo = new UserRepository();
         var officeRepo = new OfficeRepository();
         Logger.Debug("Repositories initialized");

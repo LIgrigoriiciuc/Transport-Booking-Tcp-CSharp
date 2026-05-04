@@ -8,7 +8,7 @@ namespace Server.Service;
 public class SeatService : AbstractService<long, Seat>
 {
     private static readonly ILogger Logger = Log.ForContext<SeatService>();
-    public SeatService(SeatRepository seatRepository) : base(seatRepository)
+    public SeatService(IRepository<long,Seat> seatRepository) : base(seatRepository)
     {
     }
 

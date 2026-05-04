@@ -6,9 +6,9 @@ namespace Server.Service;
 
 public abstract class AbstractService<TId, TE> : IService<TId, TE> where TE : Entity<TId>
 {
-    protected readonly GenericRepository<TId, TE> Repository;
+    protected readonly IRepository<TId, TE> Repository;
 
-    protected AbstractService(GenericRepository<TId, TE> repository)
+    protected AbstractService(IRepository<TId, TE> repository)
     {
         Repository = repository;
     }

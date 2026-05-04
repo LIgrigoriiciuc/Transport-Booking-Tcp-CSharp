@@ -5,7 +5,7 @@ namespace Server.Service;
 
 public class OfficeService : AbstractService<long, Office>
 {
-    public OfficeService(OfficeRepository repository) : base(repository)
+    public OfficeService(IRepository<long,Office> repository) : base(repository)
     {
     }
 }

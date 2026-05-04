@@ -58,4 +58,17 @@ public class Filter
 
     public int Size => _conditions.Count;
     public bool IsEmpty => !_conditions.Any();
-}
+    //returns the raw column conditions paired with their values
+    public IReadOnlyList<(string Column, object Value)> GetConditions()
+    {
+        var result = new List<(string, object)>();
+        for (int i = 0; i < _conditions.Count; i++)
+        {
+            var raw = _conditions[i]; // "trip_id = @p0"
+            var col = raw.Split(' ')[0]; //["trip_id", "=", "@p0", [0] = "trip_id"
+            result.Add((col, _parameters[i].Value)); // ("trip_id", 3)
+        }
+        return result;
+    }
+
+    }

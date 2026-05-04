@@ -8,7 +8,7 @@ public class ReservationService : AbstractService<long, Reservation>
 {
     private readonly SeatService _seatService;
 
-    public ReservationService(ReservationRepository repository, SeatService seatService) 
+    public ReservationService(IRepository<long,Reservation> repository, SeatService seatService) 
         : base(repository)
     {
         _seatService = seatService;

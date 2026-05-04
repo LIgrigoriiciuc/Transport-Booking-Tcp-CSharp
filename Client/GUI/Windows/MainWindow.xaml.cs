@@ -18,7 +18,7 @@ public partial class MainWindow : Window, IObserver
     private List<ProtoSeat> _selectedSeats = new();
     private bool _refreshing;
 
-    private static readonly SolidColorBrush BrushFree     = new(Color.FromRgb(224, 224, 224));
+    private static readonly SolidColorBrush BrushFree = new(Color.FromRgb(224, 224, 224));
     private static readonly SolidColorBrush BrushSelected = new(Color.FromRgb(185,  185,  185));
     private static readonly SolidColorBrush BrushReserved = new(Color.FromRgb(145, 145, 145));
 
@@ -40,8 +40,26 @@ public partial class MainWindow : Window, IObserver
         Dispatcher.Invoke(() =>
         {
             RefreshReservations(push.Reservations);
+
             if (_selectedTrip != null && _selectedTrip.Id == push.UpdatedTripId)
-                RefreshSeats();
+            {
+                RefreshSeats(); 
+            }
+            else
+            {
+                var affectedTrip = (TripTable.ItemsSource as IEnumerable<ProtoTrip>)
+                    ?.FirstOrDefault(t => t.Id == push.UpdatedTripId);
+
+                if (affectedTrip != null)
+                {
+                    affectedTrip.FreeSeats = _proxy.GetSeats(push.UpdatedTripId)
+                        .Seats.Count(s => !s.Reserved);
+
+                    _refreshing = true;
+                    TripTable.Items.Refresh();
+                    _refreshing = false;
+                }
+            }
         });
     }
 

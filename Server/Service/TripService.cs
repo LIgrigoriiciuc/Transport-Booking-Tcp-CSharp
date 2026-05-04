@@ -7,7 +7,7 @@ namespace Server.Service;
 
 public class TripService : AbstractService<long, Trip>
 {
-    public TripService(TripRepository repository) : base(repository)
+    public TripService(IRepository<long,Trip> repository) : base(repository)
     {
     }
  
