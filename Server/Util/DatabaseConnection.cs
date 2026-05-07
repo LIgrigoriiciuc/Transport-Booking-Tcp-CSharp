@@ -8,11 +8,6 @@ public class DatabaseConnection
 {
     private static readonly ILogger Logger = Log.ForContext<DatabaseConnection>();
     private static readonly string DbUrl;
-    //this ThreadStatic is overengineered for this app since reserve and unreserve share a lock and are the only methods who imply transactions 
-    //for further additions in matter of transactions it could be useful
-    //in Java I had ThreadLocal<Connection> and there it was necessary since db methods inside transaction need a specific connection
-    //the ones that don't imply a transaction run unlocked and in parallel with the locked ones so connection isolation per thread matters
-    //otherwise, the methods that don't imply transactions can't conflict even if they run in parallel because they receive a new connection and the value of the connection in the ThreadLocal remains null
     [ThreadStatic]
     private static SqliteTransaction? _activeTransaction;
     static DatabaseConnection()
